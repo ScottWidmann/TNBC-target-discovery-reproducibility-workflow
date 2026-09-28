@@ -15,6 +15,7 @@ authors:
     given-names: Scott
 version: 1.0.0
 license: MIT
+date-released: "2026-09-28"
 repository-code: "https://github.com/ScottWidmann/TNBC-target-discovery-reproducibility-workflow"
 keywords:
   - triple-negative breast cancer
