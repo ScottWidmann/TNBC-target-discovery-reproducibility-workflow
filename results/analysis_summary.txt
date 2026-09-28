@@ -1,0 +1,13 @@
+TCGA-BRCA TNBC Analysis Summary
+================================
+
+Sample Information:
+- Total samples analyzed: 1104
+- TNBC samples: 116
+- Normal samples: 27
+
+Gene Analysis:
+- Genes analyzed: 26067
+- Significantly differentially expressed: 16108
+- Upregulated in TNBC: 2739
+- Potentially druggable targets: 141

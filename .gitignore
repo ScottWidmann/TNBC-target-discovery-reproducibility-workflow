@@ -1,0 +1,18 @@
+.Rhistory
+.Rproj.user/
+Rplots.pdf
+.agents/
+.codex/
+test.png
+
+# Large downloaded inputs; preserve provenance separately.
+GDCdata/
+data/
+DepMapCrispr/*.csv
+
+# Corrected workflow generated artifacts.
+analysis_v2/results/
+analysis_v2/plots/
+analysis_v2/provenance/run_log.csv
+analysis_v2/provenance/session_info.txt
+analysis_v2/provenance/package_versions.csv

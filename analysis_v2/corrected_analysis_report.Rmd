@@ -1,0 +1,200 @@
+---
+title: "Corrected TCGA-BRCA TNBC Target-Nomination Analysis"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    self_contained: true
+params:
+  analysis_root: "analysis_v2"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+options(knitr.graphics.rel_path = FALSE)
+analysis_root <- normalizePath(
+  dirname(knitr::current_input(dir = TRUE)),
+  mustWork = TRUE
+)
+results_dir <- file.path(analysis_root, "results")
+plots_dir <- file.path(analysis_root, "plots")
+read_result <- function(name) {
+  data.table::fread(file.path(results_dir, name), data.table = FALSE)
+}
+show_table <- function(x, digits = 3) {
+  knitr::kable(x, digits = digits, row.names = FALSE)
+}
+candidate <- read_result("candidate_evidence.csv")
+flow <- read_result("sample_flow.csv")
+covariates <- read_result("covariate_eligibility.csv")
+de_summary <- read_result("de_contrast_summary.csv")
+mapping <- read_result("mapping_audit.csv")
+enrichment_metadata <- read_result("enrichment_run_metadata.csv")
+depmap_metadata <- read_result("depmap_run_metadata.csv")
+warnings <- data.table::fread(
+  file.path(analysis_root, "provenance", "warnings.csv"),
+  data.table = FALSE
+)
+```
+
+# Scope and interpretation
+
+This corrected workflow uses the frozen local TCGA-BRCA STAR-count, clinical,
+and DepMap snapshots to nominate TNBC targets. It separates expression,
+sensitivity-analysis, dependency, selectivity, common-essential, and
+tractability evidence. The output is a prioritization resource, not evidence of
+causality, clinical efficacy, or safety.
+
+# Frozen inputs and provenance
+
+All expression counts were read offline from 1,224 checksum-recorded local
+files. A single metadata-only GDC query was frozen to map file UUIDs to samples;
+normal reruns require that local response and do not query GDC. Enrichment used
+only locally installed annotation collections.
+
+```{r enrichment-sources}
+show_table(enrichment_metadata)
+```
+
+# Cohort construction
+
+Primary tumors were called TNBC only when ER, PR, and HER2 were all recorded as
+negative. Normals were assigned from GDC sample type independently of receptor
+fields. One sample per patient and analysis group was selected by a deterministic
+barcode rule. The primary comparison is all eligible TNBC tumors versus all
+eligible solid-tissue normals; the paired comparison is a sensitivity analysis.
+
+```{r cohort-flow}
+show_table(flow)
+```
+
+```{r pca, fig.cap="PCA of the primary TNBC and normal cohort; the embedded plot caption reports the transformation and group sizes."}
+knitr::include_graphics(file.path(plots_dir, "pca_primary.png"))
+```
+
+# Differential-expression models
+
+The numerator is TNBC in every contrast. Genes were filtered within each
+contrast, modeled with DESeq2, and effect sizes were shrunk with apeglm. Candidate
+expression evidence requires primary FDR below 0.05 and shrunken log2 fold change
+above 1. Age was scaled before modeling when eligible.
+
+```{r de-summary}
+show_table(de_summary)
+```
+
+## Covariate decisions
+
+Covariates were included only when sufficiently complete and not group-confounded.
+Patient identity was used as a block in the paired model.
+
+```{r covariates}
+show_table(covariates)
+```
+
+```{r volcano, fig.cap="Primary TNBC-minus-normal differential expression; thresholds and sample sizes are stated in the plot caption."}
+knitr::include_graphics(file.path(plots_dir, "volcano_primary.png"))
+```
+
+## Sensitivity analyses
+
+Positive paired and specificity effects are recorded as directional concordance,
+not as replacement primary tests. Missing estimates remain explicitly unavailable.
+
+```{r paired, fig.cap="Paired-versus-primary effect concordance."}
+knitr::include_graphics(file.path(plots_dir, "concordance_paired_primary.png"))
+```
+
+```{r specificity, fig.cap="Specificity-versus-primary effect concordance."}
+knitr::include_graphics(file.path(plots_dir, "concordance_specificity_primary.png"))
+```
+
+# Enrichment and mapping losses
+
+ORA used direction-specific primary genes and the tested, mapped background for
+each collection. Ranked enrichment used the full finite primary statistic. The
+mapping audit below bounds interpretation of both analyses.
+
+```{r mapping-audit}
+show_table(mapping)
+```
+
+```{r enrichment-go-up, fig.cap="GO biological-process ORA for primary upregulated genes; the plot caption states the contrast, samples, thresholds, and universe."}
+knitr::include_graphics(file.path(plots_dir, "enrichment_go_up.png"))
+```
+
+```{r enrichment-go-down, fig.cap="GO biological-process ORA for primary downregulated genes; the plot caption states the contrast, samples, thresholds, and universe."}
+knitr::include_graphics(file.path(plots_dir, "enrichment_go_down.png"))
+```
+
+```{r enrichment-kegg-up, fig.cap="KEGG-legacy ORA for primary upregulated genes; the plot caption states the contrast, samples, thresholds, and universe."}
+knitr::include_graphics(file.path(plots_dir, "enrichment_kegg_up.png"))
+```
+
+```{r enrichment-kegg-down, fig.cap="KEGG-legacy ORA for primary downregulated genes; the plot caption states the contrast, samples, thresholds, and universe."}
+knitr::include_graphics(file.path(plots_dir, "enrichment_kegg_down.png"))
+```
+
+# DepMap dependency evidence
+
+Model inclusion used literal local subtype labels: TNBC models versus explicitly
+ER-positive or HER2-positive breast comparators. The exact DepMap release could
+not be recovered from local source files and is therefore unresolved. Gene-effect
+summaries are model-level; no probability table was substituted.
+
+```{r depmap-metadata}
+show_table(depmap_metadata)
+```
+
+```{r depmap-plot, fig.cap="TNBC-versus-comparator median DepMap gene effects; panel sizes and thresholds appear in the plot caption."}
+knitr::include_graphics(file.path(plots_dir, "depmap_tnbc_vs_non_tnbc.png"))
+```
+
+# Candidate evidence classes
+
+No arithmetic score is used. Class A requires primary upregulation, both
+sensitivity directions, TNBC dependency, TNBC-selective dependency, and absence
+from the frozen common-essential list. Class B requires primary upregulation,
+TNBC dependency, and at least one sensitivity direction. Remaining primary hits
+are Class C. Tractability is **not assessed** because the configured evidence
+table is intentionally empty; this must not be interpreted as “not druggable.”
+
+```{r class-counts}
+class_counts <- as.data.frame(table(candidate$evidence_class), stringsAsFactors = FALSE)
+names(class_counts) <- c("evidence_class", "genes")
+show_table(class_counts)
+```
+
+```{r top-candidates}
+top_candidates <- candidate[
+  candidate$evidence_class %in% c("A_multistream", "B_expression_dependency"),
+  c(
+    "ensembl_id", "gene_symbol", "evidence_class", "primary_padj",
+    "primary_log2fc_shrunk", "paired_log2fc_shrunk",
+    "specificity_log2fc_shrunk", "tnbc_median_effect",
+    "tnbc_fraction_below_threshold", "tnbc_minus_non_tnbc",
+    "common_essential", "tractability_assessment"
+  ),
+  drop = FALSE
+]
+show_table(utils::head(top_candidates, 30))
+```
+
+# Warnings and limitations
+
+```{r warnings}
+show_table(warnings)
+```
+
+Additional limitations include cross-sectional bulk-tissue composition,
+clinical-annotation error, residual technical or site effects, gene-symbol-based
+joining to DepMap, and the lack of experimental validation. Candidate classes
+are transparent evidence summaries for follow-up, not claims of therapeutic
+actionability.
+
+# Reproduction
+
+Run `Rscript analysis_v2/run_all.R` after loading R 4.4.2. Input, source, output,
+package, session, warning, and per-stage provenance records are stored under
+`analysis_v2/provenance/`.

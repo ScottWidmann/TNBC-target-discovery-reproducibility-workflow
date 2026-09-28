@@ -1,0 +1,21 @@
+project: TCGA-BRCA
+expression_root: GDCdata/TCGA-BRCA/Transcriptome_Profiling/Gene_Expression_Quantification
+clinical_patient_file: GDCdata/TCGA-BRCA/Clinical/Clinical_Supplement/8162d394-8b64-4da2-9f5b-d164c54b9608/nationwidechildrens.org_clinical_patient_brca.txt
+depmap_root: DepMapCrispr
+random_seed: 20260819
+expression_filter:
+  min_count: 10
+  min_fraction: 0.10
+differential_expression:
+  alpha: 0.05
+  lfc_threshold: 1.0
+  shrink_type: apeglm
+  covariate_min_complete: 0.90
+  candidate_covariates:
+    - age_at_diagnosis
+    - race
+    - tissue_source_site
+depmap:
+  dependency_threshold: -0.5
+  dependency_fraction: 0.50
+  selectivity_delta: -0.2

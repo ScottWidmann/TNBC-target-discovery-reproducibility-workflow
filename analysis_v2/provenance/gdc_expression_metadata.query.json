@@ -1,0 +1,11 @@
+{
+  "lookup_kind": "metadata_only",
+  "project": "TCGA-BRCA",
+  "data_category": "Transcriptome Profiling",
+  "data_type": "Gene Expression Quantification",
+  "workflow_type": "STAR - Counts",
+  "sample_type": ["Primary Tumor", "Solid Tissue Normal"],
+  "local_file_count": 1224,
+  "downloaded_data": false,
+  "retrieved_at_utc": "2026-08-20T15:25:55Z"
+}

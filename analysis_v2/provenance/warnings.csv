@@ -1,0 +1,8 @@
+warning_id,scope,warning
+W001,DepMap provenance,The exact DepMap release is unresolved for the frozen local snapshot.
+W002,Tractability,Tractability is not assessed because no versioned evidence source was supplied.
+W003,Scientific claim,This observational workflow nominates targets; it does not establish causal dependency or therapeutic efficacy.
+W004,Cohort,The primary analysis uses all eligible normals; only 11 TNBC-normal patient pairs support the paired sensitivity analysis.
+W005,Tumor subtype,"TNBC is defined from clinical ER, PR, and HER2 fields, not a molecular-subtype classifier."
+W006,Model adjustment,Age was eligible for primary and specificity adjustment; race and tissue source site were rejected as group-confounded.
+W007,Identifier mapping,Enrichment is limited to tested genes that map to the frozen local GO and KEGG legacy collections.

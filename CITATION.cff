@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: >-
+  If you use this workflow, please cite it using these metadata, and cite the
+  data providers listed in docs/DATA_SOURCES.md.
+type: software
+title: "TNBC Target Discovery: A Reproducible Multi-Resource Workflow"
+abstract: >-
+  A reproducible triple-negative breast cancer target-nomination workflow
+  using open-access TCGA-BRCA data from the NCI Genomic Data Commons, DepMap
+  CRISPR screens, and local Gene Ontology and MSigDB collections. It records
+  frozen-input provenance, an audit of an earlier exploratory workflow with
+  test-enforced remediation, and retained limiting findings.
+authors:
+  - family-names: Widmann
+    given-names: Scott
+version: 1.0.0
+license: MIT
+repository-code: "https://github.com/ScottWidmann/TNBC-target-discovery-reproducibility-workflow"
+keywords:
+  - triple-negative breast cancer
+  - target nomination
+  - TCGA
+  - DepMap
+  - reproducibility
+  - provenance
+  - R
