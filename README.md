@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/banner.png" alt="Abstract banner: three streams of fine lines, representing separate public data sources, narrow through a series of gates and converge on a target of concentric rings, beside the title Triple-negative breast cancer, target discovery." width="100%">
+</p>
+
 # TNBC Target Discovery: A Reproducible Multi-Resource Workflow
 
 This repository documents a reproducible triple-negative breast cancer (TNBC)
